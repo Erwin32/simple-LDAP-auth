@@ -74,16 +74,24 @@ class auth {
      */
     public $auth=0;
     /**
-     * contains username if succefully authentficated
-     * @var type string
-     */
-    public $user;
-    /**
      * contains access level 0=none or unathorized 1=user 2=managment acc
      * @var type int
      */
     public $access=0;
-            
+    
+    /**
+     * contains username after user init
+     * @var type string
+     */
+    public $user;
+    
+    /**
+     * contain user password after user init
+     * @var type string
+     */
+    protected $password;
+
+
     /**
      * loads passed configuration and inits connection
      * @param type $ldap_host
@@ -106,7 +114,8 @@ class auth {
      * well destructor :P
      */
     public function __destruct() {
-        //meh zatim nic
+        //kdyby nahodou nebylo unbidnuto
+        @ldap_unbind($this->ldap);
     }
     
     /**
@@ -124,15 +133,80 @@ class auth {
      * @throws Exception
      */
     protected function init_connection(){
-        $this->ldap=ldap_connect($this->ldap_host);
+        $this->ldap=ldap_connect($this->ldap_host,3268);
         if($this->ldap){
-            $this->status='connected :)';     
+            $this->status='connected :)';
+            ldap_set_option($this->ldap, LDAP_OPT_PROTOCOL_VERSION,3);
+            ldap_set_option($this->ldap, LDAP_OPT_REFERRALS,0);
         }
         else {
             $this->status='Cant connect to LDAP';
             throw new Exception($this->status);
         }
         return TRUE;
+    }
+    
+    public function userInit($user,$password) {
+        $this->user=$user;
+        $this->password=$password;
+        
+        return TRUE;
+    }
+    
+    /**
+     * Converts Binary string (like thumbnail from LDAP to base64 datastring for display
+     * @param type $file
+     * @param type $mime
+     * @return type base64 datastring
+     */
+    protected function data_uri($file, $mime) {  
+      $base64   = base64_encode($file); 
+      return ('data:' . $mime . ';base64,' . $base64);
+    }
+    
+    /**
+     * Gets LDAP thumbnail img
+     * @param type $user
+     * @param type $password
+     * @return type base64 datatring of the thumbnail
+     * @throws Exception
+     */
+    public function getLDAPimg($user=null,$password=null) {
+        $newCredentials=TRUE;
+        //since we cant set those in param def
+        if($password===null){$password=  $this->password;$newCredentials=FALSE;}
+        if($user===null){$user=  $this->user;$newCredentials=FALSE;}
+        //store user pass and name for future use
+        if($newCredentials){$this->userInit($user, $password);}
+        
+        
+        $bind=$bind = ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);//ldap_bind($this->ldap, $this->ldap_dn, $password);
+        
+        if($bind){
+            $filter = "(sAMAccountName=" . $user . ")";
+            $attr = array("thumbnailphoto");
+            $result = @ldap_search($this->ldap, $this->ldap_dn, $filter, $attr);
+            if($result==FALSE){
+                throw new Exception("Unable to search LDAP server. Reason: ".  ldap_error($this->ldap));
+            }  
+            $entry= ldap_first_entry($this->ldap, $result);
+
+            if ($entry) {
+                $info = ldap_get_values_len($this->ldap, $entry, "thumbnailphoto");
+                if(!$info){
+                   throw new Exception("Unable to decode thumbnail. Error: ".  ldap_error($this->ldap));
+                }
+                //echo '<img src="'.$this->data_uri($info[0], 'image/png').'">';
+            }
+            
+            ldap_unbind($this->ldap);
+            return $this->data_uri($info[0], 'image/png');
+        }
+        else {
+            // invalid name or password
+            $this->status='Cand authenticate for search on LDAP';
+            throw new Exception($this->status);
+        }
     }
     
     /**
@@ -142,7 +216,13 @@ class auth {
      * @return boolean
      * @throws Exception
      */
-    public function authenticate($user, $password) {
+    public function authenticate($user=null, $password=null) {
+        $newCredentials=TRUE;
+        //since we cant set those in param def
+        if($password===null){$password=  $this->password;$newCredentials=FALSE;}
+        if($user===null){$user=  $this->user;$newCredentials=FALSE;}
+        //store user pass and name for future use
+        if($newCredentials){$this->userInit($user, $password);}
         // verify user and password
         $bind = ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);
 
@@ -154,7 +234,7 @@ class auth {
             $attr = array("memberof");
             $result = @ldap_search($this->ldap, $this->ldap_dn, $filter, $attr);
             if($result==FALSE){
-                throw new Exception("Unable to search LDAP server");
+                 throw new Exception("Unable to search LDAP server. Reason: ".  ldap_error($this->ldap));
             }  
             $entries = ldap_get_entries($this->ldap, $result);
             
