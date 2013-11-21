@@ -1,0 +1,15 @@
+{
+    "name": "erwin32/ldap",
+    "description": "Simple lib to authenticate trough ldap with some extra features",
+    "license": "GNU2",
+    "authors": [
+        {
+            "name": "Petr Palas",
+            "email": "erwin32.64@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+
+    }
+}
