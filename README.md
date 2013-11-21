@@ -30,7 +30,7 @@ Init sample
 
 For auth use like this(expects inicialized class in $ldap)
 
-first argument is username second is passowrd
+first argument is username second is passoword
 ```PHP
     try {
         $ldap->authenticate($user, $pass);
