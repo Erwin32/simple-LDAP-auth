@@ -90,9 +90,13 @@ class auth {
      * @var type string
      */
     protected $password;
+    
+    const ERROR_WRONG_USER_GROUP=2;
+    const ERROR_CANT_AUTH=1;
+    const ERROR_CANT_SEARCH=3;
+    const ERROR_IMG_DECODE=4;
 
-
-    /**
+        /**
      * loads passed configuration and inits connection
      * @param type $ldap_host
      * @param type $ldap_dn
@@ -187,14 +191,14 @@ class auth {
             $attr = array("thumbnailphoto");
             $result = @ldap_search($this->ldap, $this->ldap_dn, $filter, $attr);
             if($result==FALSE){
-                throw new Exception("Unable to search LDAP server. Reason: ".  ldap_error($this->ldap));
+                throw new Exception("Unable to search LDAP server. Reason: ".  ldap_error($this->ldap),  self::ERROR_CANT_SEARCH);
             }  
             $entry= ldap_first_entry($this->ldap, $result);
 
             if ($entry) {
                 $info = ldap_get_values_len($this->ldap, $entry, "thumbnailphoto");
                 if(!$info){
-                   throw new Exception("Unable to decode thumbnail. Error: ".  ldap_error($this->ldap));
+                   throw new Exception("Unable to decode thumbnail. Error: ".  ldap_error($this->ldap),  self::ERROR_IMG_DECODE);
                 }
                 //echo '<img src="'.$this->data_uri($info[0], 'image/png').'">';
             }
@@ -204,8 +208,8 @@ class auth {
         }
         else {
             // invalid name or password
-            $this->status='Cand authenticate for search on LDAP';
-            throw new Exception($this->status);
+            $this->status='Cant authenticate for search on LDAP';
+            throw new Exception($this->status, self::ERROR_CANT_AUTH);
         }
     }
     
@@ -234,7 +238,7 @@ class auth {
             $attr = array("memberof");
             $result = @ldap_search($this->ldap, $this->ldap_dn, $filter, $attr);
             if($result==FALSE){
-                 throw new Exception("Unable to search LDAP server. Reason: ".  ldap_error($this->ldap));
+                 throw new Exception("Unable to search LDAP server. Reason: ".  ldap_error($this->ldap),  self::ERROR_CANT_SEARCH);
             }  
             $entries = ldap_get_entries($this->ldap, $result);
             
@@ -262,14 +266,17 @@ class auth {
                 return true;
             } else {
                 // user has no rights
+                $this->access=$access;
+                $this->user= $user;
+                $this->auth=1;
                 $this->status='User exists but not part of the target group';
-                throw new Exception($this->status);
+                throw new Exception($this->status,  self::ERROR_WRONG_USER_GROUP);
             }
 
         } else {
             // invalid name or password
-            $this->status='User and password combination is wrong';
-            throw new Exception($this->status);
+            $this->status='Cant authenticate for search on LDAP';
+            throw new Exception($this->status,  self::ERROR_CANT_AUTH);
         }
     }
 
