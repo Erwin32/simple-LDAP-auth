@@ -9,7 +9,7 @@ Usage:
 Init sample
 ```PHP
     // Active Directory server
-    $ldap_host = "123.123.123.123";//IP adres or url
+    $ldap_host = "123.123.123.123";//IP adress or url
 
     // Active Directory DN
     $ldap_dn = 'DC=domain,DC=com';//domain in this example is used "domain.com"
@@ -30,7 +30,7 @@ Init sample
 
 For auth use like this(expects inicialized class in $ldap)
 
-first argument is username secon is passowrd
+first argument is username second is passowrd
 ```PHP
     try {
         $ldap->authenticate($user, $pass);
@@ -46,10 +46,11 @@ first argument is username secon is passowrd
 ```
 
 
-For thumbnail img retrival
+Thumbnail img retrival example
 ```PHP
     try {
         $ldap->userInit($user, $pass);
+        //we can display it like this
         echo '<img src="'.$ldap->getLDAPimg().'">';
 
     } catch (Exception $exc) {
