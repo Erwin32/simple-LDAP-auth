@@ -110,7 +110,7 @@ class auth {
         $this->ldap_dn=$ldap_dn;
         $this->ldap_user_group=$ldap_user_group;
         $this->ldap_manager_group=$ldap_manager_group;
-        $this->ldap_usr_dom=  trim($ldap_usr_dom,'@').'@';
+        $this->ldap_usr_dom=  '@'.trim($ldap_usr_dom,'@');
         
         $this->init_connection();
     }
@@ -185,7 +185,7 @@ class auth {
         if($newCredentials){$this->userInit($user, $password);}
         
         
-        $bind=$bind = ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);//ldap_bind($this->ldap, $this->ldap_dn, $password);
+        $bind = ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);//ldap_bind($this->ldap, $this->ldap_dn, $password);
         
         if($bind){
             $filter = "(sAMAccountName=" . $user . ")";
@@ -210,7 +210,7 @@ class auth {
         else {
             // invalid name or password
             $this->status='Cant authenticate for search on LDAP';
-            throw new Exception($this->status, self::ERROR_CANT_AUTH);
+            throw new Exception($this->status.' '.  ldap_error($this->ldap), self::ERROR_CANT_AUTH);
         }
     }
     
@@ -229,7 +229,7 @@ class auth {
         //store user pass and name for future use
         if($newCredentials){$this->userInit($user, $password);}
         // verify user and password
-        $bind = ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);
+        $bind = @ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);
 
         
         if($bind) {
@@ -271,13 +271,13 @@ class auth {
                 $this->user= $user;
                 $this->auth=1;
                 $this->status='User exists but not part of the target group';
-                throw new Exception($this->status,  self::ERROR_WRONG_USER_GROUP);
+                throw new Exception($this->status.' '.  ldap_error($this->ldap),  self::ERROR_WRONG_USER_GROUP);
             }
 
         } else {
             // invalid name or password
             $this->status='Cant authenticate for search on LDAP';
-            throw new Exception($this->status,  self::ERROR_CANT_AUTH);
+            throw new Exception($this->status.' '.  ldap_error($this->ldap),  self::ERROR_CANT_AUTH);
         }
     }
 
