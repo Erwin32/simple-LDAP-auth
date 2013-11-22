@@ -97,7 +97,7 @@ class auth {
     const ERROR_IMG_DECODE=4;
     const ERROR_CANT_CONNECT=5;
 
-        /**
+    /**
      * loads passed configuration and inits connection
      * @param type $ldap_host
      * @param type $ldap_dn
