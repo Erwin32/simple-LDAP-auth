@@ -110,7 +110,7 @@ class auth {
         $this->ldap_dn=$ldap_dn;
         $this->ldap_user_group=$ldap_user_group;
         $this->ldap_manager_group=$ldap_manager_group;
-        $this->ldap_usr_dom=$ldap_usr_dom;
+        $this->ldap_usr_dom=  trim($ldap_usr_dom,'@').'@';
         
         $this->init_connection();
     }
