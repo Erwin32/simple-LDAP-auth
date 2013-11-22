@@ -95,6 +95,7 @@ class auth {
     const ERROR_CANT_AUTH=1;
     const ERROR_CANT_SEARCH=3;
     const ERROR_IMG_DECODE=4;
+    const ERROR_CANT_CONNECT=5;
 
         /**
      * loads passed configuration and inits connection
@@ -145,7 +146,7 @@ class auth {
         }
         else {
             $this->status='Cant connect to LDAP';
-            throw new Exception($this->status);
+            throw new Exception($this->status,  self::ERROR_CANT_CONNECT);
         }
         return TRUE;
     }
