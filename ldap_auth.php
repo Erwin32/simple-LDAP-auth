@@ -111,8 +111,6 @@ class auth {
         $this->ldap_user_group=$ldap_user_group;
         $this->ldap_manager_group=$ldap_manager_group;
         $this->ldap_usr_dom=  '@'.trim($ldap_usr_dom,'@');
-        
-        $this->init_connection();
     }
     
     /**
@@ -184,6 +182,8 @@ class auth {
         //store user pass and name for future use
         if($newCredentials){$this->userInit($user, $password);}
         
+        //since conection is one off we need to get it
+        $this->init_connection();
         
         $bind = @ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);//ldap_bind($this->ldap, $this->ldap_dn, $password);
         
@@ -233,6 +233,10 @@ class auth {
         if($user===null){$user=  $this->user;$newCredentials=FALSE;}
         //store user pass and name for future use
         if($newCredentials){$this->userInit($user, $password);}
+        
+        //since conection is one off we need to get it
+        $this->init_connection();
+        
         // verify user and password
         $bind = @ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);
 
