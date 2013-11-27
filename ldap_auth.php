@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * inspired by http://samjlevy.com/2010/09/php-login-script-using-ldap-verify-group-membership/
- */
+ */ 
 
 namespace LDAP;
 
@@ -176,7 +176,7 @@ class auth {
      * @return type base64 datatring of the thumbnail
      * @throws Exception
      */
-    public function getLDAPimg($user=null,$password=null) {
+    public function getLDAPimg($user=null,$password=null,$raw=FALSE) {
         $newCredentials=TRUE;
         //since we cant set those in param def
         if($password===null){$password=  $this->password;$newCredentials=FALSE;}
@@ -185,7 +185,7 @@ class auth {
         if($newCredentials){$this->userInit($user, $password);}
         
         
-        $bind = ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);//ldap_bind($this->ldap, $this->ldap_dn, $password);
+        $bind = @ldap_bind($this->ldap, $user . $this->ldap_usr_dom, $password);//ldap_bind($this->ldap, $this->ldap_dn, $password);
         
         if($bind){
             $filter = "(sAMAccountName=" . $user . ")";
@@ -205,7 +205,12 @@ class auth {
             }
             
             ldap_unbind($this->ldap);
-            return $this->data_uri($info[0], 'image/png');
+            if(!$raw){
+                return $this->data_uri($info[0], 'image/png');
+            }
+            else{
+                return $info[0];
+            }
         }
         else {
             // invalid name or password
