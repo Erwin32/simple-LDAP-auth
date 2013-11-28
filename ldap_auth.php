@@ -197,7 +197,7 @@ class auth {
             $entry= ldap_first_entry($this->ldap, $result);
 
             if ($entry) {
-                $info = ldap_get_values_len($this->ldap, $entry, "thumbnailphoto");
+                $info = @ldap_get_values_len($this->ldap, $entry, "thumbnailphoto");
                 if(!$info){
                    throw new Exception("Unable to decode thumbnail. Error: ".  ldap_error($this->ldap),  self::ERROR_IMG_DECODE);
                 }
