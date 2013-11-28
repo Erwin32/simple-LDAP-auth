@@ -256,7 +256,9 @@ class auth {
             $this->result=$entries;
 
             ldap_unbind($this->ldap);
-
+            
+            $access = 0;
+            
             // check groups
             foreach($entries[0]['memberof'] as $grps) {
                 // is manager, break loop
