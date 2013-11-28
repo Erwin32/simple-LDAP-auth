@@ -204,7 +204,7 @@ class auth {
                 //echo '<img src="'.$this->data_uri($info[0], 'image/png').'">';
             }
             
-            ldap_unbind($this->ldap);
+            
             if(!$raw){
                 return $this->data_uri($info[0], 'image/png');
             }
@@ -217,6 +217,7 @@ class auth {
             $this->status='Cant authenticate for search on LDAP';
             throw new Exception($this->status.' '.  ldap_error($this->ldap), self::ERROR_CANT_AUTH);
         }
+        ldap_unbind($this->ldap);
     }
     
     /**
@@ -255,7 +256,7 @@ class auth {
             //save result for future use
             $this->result=$entries;
 
-            ldap_unbind($this->ldap);
+            
             
             $access = 0;
             
@@ -290,6 +291,7 @@ class auth {
             $this->status='Cant authenticate for search on LDAP';
             throw new Exception($this->status.' '.  ldap_error($this->ldap),  self::ERROR_CANT_AUTH);
         }
+        ldap_unbind($this->ldap);
     }
 
 }
