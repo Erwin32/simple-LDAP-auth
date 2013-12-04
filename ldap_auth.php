@@ -91,6 +91,9 @@ class auth {
      */
     protected $password;
     
+    /**
+     * Exeptions code constants
+     */
     const ERROR_WRONG_USER_GROUP=2;
     const ERROR_CANT_AUTH=1;
     const ERROR_CANT_SEARCH=3;
@@ -98,7 +101,7 @@ class auth {
     const ERROR_CANT_CONNECT=5;
 
     /**
-     * loads passed configuration and inits connection
+     * loads passed configuration in case of the ldap_usr_dom it makes sure that this strings begins with '@' 
      * @param type $ldap_host
      * @param type $ldap_dn
      * @param type $ldap_user_group
@@ -115,14 +118,15 @@ class auth {
     
     /**
      * well destructor :P
+     * just in case there is opened connection to LDAP while destructing this class
      */
     public function __destruct() {
-        //kdyby nahodou nebylo unbidnuto
         @ldap_unbind($this->ldap);
     }
     
     /**
-     * dumps result array for debug
+     * dumps result array for debug enclosed in pre tag
+     * Wont terminate script!
      */
     public function dump_resut() {
         echo '<pre>';
@@ -143,6 +147,7 @@ class auth {
             ldap_set_option($this->ldap, LDAP_OPT_REFERRALS,0);
         }
         else {
+            //TODO: PHP actualy dont check if there is LDAP present on the other end nor it will fail if target host is unreachable. So I need some work around that :(
             $this->status='Cant connect to LDAP';
             throw new Exception($this->status,  self::ERROR_CANT_CONNECT);
         }
@@ -171,17 +176,12 @@ class auth {
      * Gets LDAP thumbnail img
      * @param type $user
      * @param type $password
+     * @param type $raw if TRUE method will return raw binary string instead of base64 encoded with mime
      * @return type base64 datatring of the thumbnail
      * @throws Exception
      */
     public function getLDAPimg($user=null,$password=null,$raw=FALSE) {
-        $newCredentials=TRUE;
-        //since we cant set those in param def
-        if($password===null){$password=  $this->password;$newCredentials=FALSE;}
-        if($user===null){$user=  $this->user;$newCredentials=FALSE;}
-        //store user pass and name for future use
-        if($newCredentials){$this->userInit($user, $password);}
-        
+        $this->refreshCredentials($user, $password);
         //since conection is one off we need to get it
         $this->init_connection();
         
@@ -228,13 +228,7 @@ class auth {
      * @throws Exception
      */
     public function authenticate($user=null, $password=null) {
-        $newCredentials=TRUE;
-        //since we cant set those in param def
-        if($password===null){$password=  $this->password;$newCredentials=FALSE;}
-        if($user===null){$user=  $this->user;$newCredentials=FALSE;}
-        //store user pass and name for future use
-        if($newCredentials){$this->userInit($user, $password);}
-        
+       $this->refreshCredentials($user, $password);
         //since conection is one off we need to get it
         $this->init_connection();
         
@@ -292,6 +286,20 @@ class auth {
             throw new Exception($this->status.' '.  ldap_error($this->ldap),  self::ERROR_CANT_AUTH);
         }
         ldap_unbind($this->ldap);
+    }
+    
+    /**
+     * Saves new credentials if we got new or sets the old ones into referenced vars
+     * @param type $user Reference to var that shuld contain username or null
+     * @param type $password Reference to var that shuld contain password or null
+     */
+    private function refreshCredentials(&$user,&$password) {
+        $newCredentials=TRUE;
+        //since we cant set those in param def
+        if($password===null){$password=  $this->password;$newCredentials=FALSE;}
+        if($user===null){$user=  $this->user;$newCredentials=FALSE;}
+        //store user pass and name for future use
+        if($newCredentials){$this->userInit($user, $password);}
     }
 
 }
