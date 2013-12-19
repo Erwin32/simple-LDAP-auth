@@ -5,6 +5,9 @@ class for very simple ldap auth cheks if user exists and if he/she is in given g
 
 Usage:
 ------
+```
+$ composer require erwin32/ldap
+```
 
 Init sample
 ```PHP
