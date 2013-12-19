@@ -8,6 +8,9 @@
             "email": "erwin32.64@gmail.com"
         }
     ],
+    "autoload": {
+        "classmap": ["ldap_auth.php"]
+    },
     "minimum-stability": "stable",
     "require": {
 
