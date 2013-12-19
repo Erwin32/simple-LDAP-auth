@@ -1,3 +1,5 @@
 /vendor/
 *.php
 !ldap_auth.php
+.idea
+nbproject
