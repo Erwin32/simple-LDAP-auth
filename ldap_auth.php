@@ -109,6 +109,10 @@ class auth {
      * @param type $ldap_usr_dom
      */
     function __construct($ldap_host,$ldap_dn,$ldap_user_group,$ldap_manager_group,$ldap_usr_dom) {
+        if(!extension_loaded('ldap')) {
+            throw new Exception('PHP extensions LDAP is not loaded. See http://www.php.net/manual/en/ldap.installation.php for details.');
+        }
+
         $this->ldap_host=$ldap_host;
         $this->ldap_dn=$ldap_dn;
         $this->ldap_user_group=$ldap_user_group;
