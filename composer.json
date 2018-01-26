@@ -1,7 +1,7 @@
 {
     "name": "erwin32/ldap",
     "description": "Simple lib to authenticate trough ldap with some extra features",
-    "license": "GNU2",
+    "license": "GPL-2.0-only",
     "authors": [
         {
             "name": "Petr Palas",
